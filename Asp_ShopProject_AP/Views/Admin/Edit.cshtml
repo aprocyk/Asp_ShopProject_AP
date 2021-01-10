@@ -1,0 +1,32 @@
+﻿@model Product
+
+<form asp-action="Save" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <label asp-for="ProductName">Produkt</label>
+        <div><span asp-validation-for="ProductName" class="text-danger"></span></div>
+        <input asp-for="ProductName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="ProductDescription">Opis</label>
+        <div><span asp-validation-for="ProductDescription" class="text-danger"></span></div>
+        <input asp-for="ProductDescription" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Category">Kategoria</label>
+        <div><span asp-validation-for="Category" class="text-danger"></span></div>
+        <input asp-for="Category" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Price">
+            @Html.LabelFor(x => x.Price)
+        </label>
+        <div><span asp-validation-for="Price" class="text-danger"></span></div>
+        <input asp-for="Price" class="from-color" />
+    </div>
+    <div class="text-center">
+        <button class="btn btn-primary" type="submit">Zapisz</button>
+        <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+    </div>
+
+</form>

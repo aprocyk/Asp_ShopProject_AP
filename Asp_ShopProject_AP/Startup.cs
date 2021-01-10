@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Asp_ShopProject_AP.Middleware;
 using Asp_ShopProject_AP.Models;
+using Fluent.Infrastructure.FluentModel;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +32,11 @@ namespace Asp_ShopProject_AP
             services.AddRazorPages();
             services.AddTransient<IProductRepository, EFProductRepository>();
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration["Data:SportStoreProducts:ConnectionString"]));
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,20 +46,46 @@ namespace Asp_ShopProject_AP
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseRouting();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!");
-                });
-            });
             app.UseDeveloperExceptionPage(); // informacje szczegó³owe o b³êdach
+            app.UseHttpsRedirection();
+            app.UseElapsedTimeMiddleware();
+            app.UseAuthentication();
             app.UseStatusCodePages(); // Wyœwietla strony ze statusem b³êdu
             app.UseStaticFiles(); // obs³uga treœci statycznych css, images, js
             app.UseRouting();
+            app.UseRouting();
+
+            app.UseEndpoints(routes =>
+            {
+                routes.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Product}/{action=List}/{id?}");
+                routes.MapControllerRoute(
+                    name: null,
+                    pattern: "Product/{category}",
+                    defaults: new
+                    { 
+                        controller = "Product",
+                        action = "List"
+                    });
+                routes.MapControllerRoute(
+                    name: null,
+                    pattern: "Admin/{category}",
+                    defaults: new
+                    {
+                        controller ="Admin",
+                        action="Index"
+                    });
+                routes.MapControllerRoute(
+                    name: null,
+                    pattern: "Admin/{category}",
+                    defaults: new
+                    {
+                        controller = "Admin",
+                        action = "Edit"
+                    });
+            });
+            
             SeedData.EnsurePopulated(app);
         }
     }
