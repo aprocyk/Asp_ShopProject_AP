@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Asp_ShopProject_AP.Middleware;
 using Asp_ShopProject_AP.Models;
-using Fluent.Infrastructure.FluentModel;
+//using Fluent.Infrastructure.FluentModel;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -30,12 +30,15 @@ namespace Asp_ShopProject_AP
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
-            services.AddTransient<IProductRepository, EFProductRepository>();
+            
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration["Data:SportStoreProducts:ConnectionString"]));
             services.AddIdentity<IdentityUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddTransient<IProductRepository, EFProductRepository>();
+            services.AddMvc();
+            services.AddSwaggerGen();
 
         }
 
@@ -49,11 +52,19 @@ namespace Asp_ShopProject_AP
             app.UseDeveloperExceptionPage(); // informacje szczegó³owe o b³êdach
             app.UseHttpsRedirection();
             app.UseElapsedTimeMiddleware();
-            app.UseAuthentication();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
+
             app.UseStatusCodePages(); // Wyœwietla strony ze statusem b³êdu
             app.UseStaticFiles(); // obs³uga treœci statycznych css, images, js
+
+            app.UseAuthentication();
             app.UseRouting();
-            app.UseRouting();
+            app.UseAuthorization();
 
             app.UseEndpoints(routes =>
             {
@@ -70,7 +81,7 @@ namespace Asp_ShopProject_AP
                     });
                 routes.MapControllerRoute(
                     name: null,
-                    pattern: "Admin/{category}",
+                    pattern: "Admin/{action}",
                     defaults: new
                     {
                         controller ="Admin",
